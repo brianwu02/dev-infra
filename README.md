@@ -147,7 +147,7 @@ The multi-terminal workflow is inspired by [Boris Cherny's AI terminal setup](ht
 Add to `~/.zshrc` on your Mac:
 
 ```bash
-HOST_IP="192.168.1.200"  # Change to your host IP (or Tailscale IP)
+HOST_IP="<host-ip>"  # Change to your host IP (or Tailscale IP)
 
 # Each alias SSHs into the dev-box and attaches to a named tmux session.
 # If the session doesn't exist, it creates one. If it does, it reattaches.
