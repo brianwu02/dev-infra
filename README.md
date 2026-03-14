@@ -1,6 +1,6 @@
 # dev-infra
 
-Reproducible dev environment: a Docker-outside-of-Docker (DooD) dev container with database, caching, object storage, email catching, reverse proxy, and monitoring. One command to install on any Ubuntu/Debian host.
+An AI-first development environment for solo developers. Run multiple AI coding agents (Claude, Gemini) in parallel across tmux sessions, with all the infrastructure you need to ship — database, cache, object storage, email, reverse proxy, and monitoring. One `./install.sh` on any Ubuntu/Debian host.
 
 ## Prerequisites
 
