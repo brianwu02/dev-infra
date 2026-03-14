@@ -118,7 +118,7 @@ log "Waiting for containers to be ready..."
 TIMEOUT=120
 ELAPSED=0
 while [ $ELAPSED -lt $TIMEOUT ]; do
-    if docker inspect --format='{{.State.Health.Status}}' timescaledb 2>/dev/null | grep -q healthy; then
+    if docker inspect --format='{{.State.Health.Status}}' postgres 2>/dev/null | grep -q healthy; then
         break
     fi
     sleep 5
@@ -126,9 +126,9 @@ while [ $ELAPSED -lt $TIMEOUT ]; do
 done
 
 if [ $ELAPSED -ge $TIMEOUT ]; then
-    warn "TimescaleDB did not become healthy within ${TIMEOUT}s — check logs"
+    warn "PostgreSQL did not become healthy within ${TIMEOUT}s — check logs"
 else
-    log "TimescaleDB is healthy"
+    log "PostgreSQL is healthy"
 fi
 
 # --- Print summary ---
@@ -147,7 +147,7 @@ echo "  Adminer:             http://localhost:8081"
 echo "  Mailpit:             http://localhost:8025"
 echo "  MinIO console:       http://localhost:9001"
 echo ""
-echo "  TimescaleDB:         psql -h localhost -p 5432 -U devuser -d devdb"
+echo "  PostgreSQL:         psql -h localhost -p 5432 -U devuser -d devdb"
 echo "  Redis:               redis-cli -h localhost -p 6379"
 echo ""
 echo "  Makefile commands:   cd $INSTALL_DIR && make help"

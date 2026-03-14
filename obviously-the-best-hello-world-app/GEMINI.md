@@ -1,11 +1,11 @@
 # GEMINI.md — obviously-the-best-hello-world-app
 
 ## What This Is
-A minimal FastAPI app with a hit counter stored in TimescaleDB. Serves as a starter template for FastAPI + asyncpg + TimescaleDB projects and a proof-of-life service in the dev-infra stack.
+A minimal FastAPI app with a hit counter stored in PostgreSQL. Serves as a starter template for FastAPI + asyncpg + PostgreSQL projects and a proof-of-life service in the dev-infra stack.
 
 ## Architecture
 - **Runtime**: Python 3.12, FastAPI, asyncpg, uvicorn
-- **Database**: TimescaleDB (Postgres + TimescaleDB extension)
+- **Database**: PostgreSQL (Postgres + PostgreSQL extension)
 - **Container**: Single Dockerfile, runs via `docker compose` from the parent `woozy-dev-infra` project
 - **Dev environment**: Runs inside `dev-box` container using DooD (Docker-outside-of-Docker) — the Docker socket is mounted from the host
 
@@ -22,7 +22,7 @@ Single-file app (`main.py`) with 3 API endpoints:
 All state is in the `hello_counter` table (single row, auto-created on startup).
 
 ## Database
-- **Host**: `timescaledb` (Docker service name)
+- **Host**: `postgres` (Docker service name)
 - **Port**: 5432
 - **DB**: `devdb`
 - **User**: `devuser` / `changeme`
@@ -31,7 +31,7 @@ All state is in the `hello_counter` table (single row, auto-created on startup).
 ## Quick Commands
 ```bash
 # Start
-docker compose up -d hello-world timescaledb
+docker compose up -d hello-world postgres
 
 # Logs
 docker compose logs -f hello-world

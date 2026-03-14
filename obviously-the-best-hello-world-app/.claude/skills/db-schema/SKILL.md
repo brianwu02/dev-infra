@@ -1,13 +1,13 @@
 ---
 name: db-schema
-description: Database schema reference for the hello-world app's TimescaleDB instance. Use when writing queries, creating migrations, or debugging data issues.
+description: Database schema reference for the hello-world app's PostgreSQL instance. Use when writing queries, creating migrations, or debugging data issues.
 user-invokable: false
 ---
 
 # Database Schema Reference
 
-**Engine**: TimescaleDB (Postgres + TimescaleDB extension)
-**Connection**: `timescaledb:5432/devdb` (from within Docker network)
+**Engine**: PostgreSQL 17
+**Connection**: `postgres:5432/devdb` (from within Docker network)
 **User**: `devuser` / `changeme`
 
 ## Tables
@@ -48,20 +48,9 @@ CREATE TABLE IF NOT EXISTS items (
 );
 ```
 
-### Time-Series Tables (Hypertables)
-```sql
-CREATE TABLE IF NOT EXISTS events (
-    time TIMESTAMPTZ NOT NULL,
-    name TEXT NOT NULL,
-    payload JSONB DEFAULT '{}'
-);
-SELECT create_hypertable('events', 'time', if_not_exists => TRUE);
-```
-
 ### Indexing Guidelines
 - Always index foreign keys
 - Use GIN indexes for JSONB columns
-- Hypertable indexes should include the time column for partition pruning
 - Check existing indexes: `\di+ tablename`
 
 ## asyncpg Query Conventions

@@ -12,7 +12,7 @@ warn() { echo -e "  ${YELLOW}WARN${NC}  $1"; }
 fail() { echo -e "  ${RED}FAIL${NC}  $1"; }
 
 echo "=== Container Health ==="
-EXPECTED="dev-box traefik timescaledb redis minio mailpit adminer homepage watchtower dozzle uptime-kuma"
+EXPECTED="dev-box traefik postgres redis minio mailpit adminer homepage watchtower dozzle uptime-kuma"
 for c in $EXPECTED; do
     status=$(docker inspect -f '{{.State.Status}}' "$c" 2>/dev/null || echo "missing")
     if [ "$status" = "running" ]; then
@@ -65,11 +65,11 @@ check_url "MinIO"       "http://localhost:9001"
 
 echo ""
 echo "=== Database ==="
-DB_CONTAINER="${DB_CONTAINER:-timescaledb}"
+DB_CONTAINER="${DB_CONTAINER:-postgres}"
 if docker exec "$DB_CONTAINER" pg_isready -U "${DB_USER:-devuser}" -q 2>/dev/null; then
-    ok "TimescaleDB accepting connections"
+    ok "PostgreSQL accepting connections"
 else
-    fail "TimescaleDB not ready"
+    fail "PostgreSQL not ready"
 fi
 
 echo ""

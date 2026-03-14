@@ -35,13 +35,13 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DB_HOST: timescaledb
+      DB_HOST: postgres
       DB_PORT: "5432"
       DB_NAME: devdb
       DB_USER: devuser
       DB_PASSWORD: changeme
     depends_on:
-      timescaledb:
+      postgres:
         condition: service_healthy
     mem_limit: 256m
     restart: unless-stopped
@@ -96,7 +96,7 @@ IMPORTANT: For database containers, prefer `docker restart` over `docker rm` + `
 Containers on the same compose network can reach each other by service name:
 ```python
 # From hello-world container, reach the DB:
-DB_HOST = "timescaledb"  # Service name, not localhost
+DB_HOST = "postgres"  # Service name, not localhost
 DB_PORT = "5432"         # Internal port, not host-mapped port
 ```
 
@@ -104,7 +104,7 @@ DB_PORT = "5432"         # Internal port, not host-mapped port
 Services are exposed on host ports via `ports:` mapping:
 ```
 http://localhost:8000  -> hello-world container
-localhost:5432        -> timescaledb container
+localhost:5432        -> postgres container
 ```
 
 ## Development Workflow

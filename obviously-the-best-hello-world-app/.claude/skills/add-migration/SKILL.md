@@ -1,6 +1,6 @@
 ---
 name: add-migration
-description: Create a new database migration for TimescaleDB/Postgres. Covers file naming, SQL patterns, running, and updating dependent code.
+description: Create a new database migration for PostgreSQL. Covers file naming, SQL patterns, running, and updating dependent code.
 user-invokable: true
 argument-hint: description of the schema change
 ---
@@ -53,20 +53,6 @@ CREATE INDEX IF NOT EXISTS ...
 ALTER TABLE my_table ADD COLUMN IF NOT EXISTS new_col TEXT;
 DROP INDEX IF EXISTS old_index;
 ```
-
-### TimescaleDB Hypertables
-For time-series data, convert to a hypertable after creation:
-```sql
-CREATE TABLE IF NOT EXISTS events (
-    time TIMESTAMPTZ NOT NULL,
-    name TEXT NOT NULL,
-    value DOUBLE PRECISION
-);
-
-SELECT create_hypertable('events', 'time', if_not_exists => TRUE);
-```
-
-Note: If using Apache-licensed TimescaleDB (e.g., inside Supabase), continuous aggregates, compression, and automatic retention policies are NOT available. Use regular materialized views and external cron instead.
 
 ### Foreign Keys
 Always index foreign key columns:

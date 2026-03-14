@@ -1,4 +1,4 @@
-"""Obviously the best hello world app. Increments a counter in TimescaleDB on every hit."""
+"""Obviously the best hello world app. Increments a counter in PostgreSQL on every hit."""
 
 import os
 from contextlib import asynccontextmanager
@@ -12,7 +12,7 @@ DB_URL = os.environ.get(
     "postgresql://{user}:{password}@{host}:{port}/{db}".format(
         user=os.environ.get("DB_USER", "devuser"),
         password=os.environ.get("DB_PASSWORD", "changeme"),
-        host=os.environ.get("DB_HOST", "timescaledb"),
+        host=os.environ.get("DB_HOST", "postgres"),
         port=os.environ.get("DB_PORT", "5432"),
         db=os.environ.get("DB_NAME", "devdb"),
     ),

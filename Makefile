@@ -4,7 +4,7 @@ DIR     = $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 .PHONY: up down ps logs health backup-db \
         up-devbox up-monitoring up-database up-services up-example down-example \
         down-devbox down-monitoring down-database down-services \
-        logs-devbox logs-timescaledb logs-homepage logs-dozzle logs-uptime-kuma logs-watchtower \
+        logs-devbox logs-postgres logs-homepage logs-dozzle logs-uptime-kuma logs-watchtower \
         logs-traefik logs-redis logs-minio logs-mailpit logs-adminer logs-hello
 
 # ---------- All services ----------
@@ -21,7 +21,7 @@ up-devbox:
 	$(COMPOSE) -f $(DIR)/docker-compose.yml up -d dev-box
 
 up-database:
-	$(COMPOSE) -f $(DIR)/docker-compose.yml up -d timescaledb redis
+	$(COMPOSE) -f $(DIR)/docker-compose.yml up -d postgres redis
 
 up-monitoring:
 	$(COMPOSE) -f $(DIR)/docker-compose.yml up -d homepage watchtower dozzle uptime-kuma
@@ -33,7 +33,7 @@ down-devbox:
 	$(COMPOSE) -f $(DIR)/docker-compose.yml stop dev-box
 
 down-database:
-	$(COMPOSE) -f $(DIR)/docker-compose.yml stop timescaledb redis
+	$(COMPOSE) -f $(DIR)/docker-compose.yml stop postgres redis
 
 down-monitoring:
 	$(COMPOSE) -f $(DIR)/docker-compose.yml stop homepage watchtower dozzle uptime-kuma
@@ -62,8 +62,8 @@ logs:
 logs-devbox:
 	$(COMPOSE) -f $(DIR)/docker-compose.yml logs --tail 50 -f dev-box
 
-logs-timescaledb:
-	$(COMPOSE) -f $(DIR)/docker-compose.yml logs --tail 50 -f timescaledb
+logs-postgres:
+	$(COMPOSE) -f $(DIR)/docker-compose.yml logs --tail 50 -f postgres
 
 logs-redis:
 	$(COMPOSE) -f $(DIR)/docker-compose.yml logs --tail 50 -f redis

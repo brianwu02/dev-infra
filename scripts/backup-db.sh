@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# backup-db.sh — pg_dump TimescaleDB to backup dir with 7-day retention
+# backup-db.sh — pg_dump PostgreSQL to backup dir with 7-day retention
 set -euo pipefail
 
 BACKUP_DIR="${BACKUP_DIR:-/home/docker/backups}"
@@ -13,7 +13,7 @@ log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"; }
 mkdir -p "$BACKUP_DIR"
 
 log "Backing up ${DB_NAME}..."
-DB_CONTAINER="${DB_CONTAINER:-timescaledb}"
+DB_CONTAINER="${DB_CONTAINER:-postgres}"
 if docker exec "$DB_CONTAINER" pg_dump -U "$DB_USER" -Fc "$DB_NAME" \
     | gzip > "$BACKUP_DIR/${DB_NAME}_${DATE}.dump.gz"; then
     log "Backup OK: ${DB_NAME}_${DATE}.dump.gz"

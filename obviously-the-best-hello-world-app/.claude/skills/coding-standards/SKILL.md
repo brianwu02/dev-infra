@@ -1,6 +1,6 @@
 ---
 name: coding-standards
-description: Baseline code quality enforcer — naming conventions, import hygiene, type safety, and style rules for a FastAPI + asyncpg + TimescaleDB Python backend.
+description: Baseline code quality enforcer — naming conventions, import hygiene, type safety, and style rules for a FastAPI + asyncpg + PostgreSQL Python backend.
 ---
 
 # Coding Standards

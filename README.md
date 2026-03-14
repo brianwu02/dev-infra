@@ -32,7 +32,7 @@ An AI-first development environment for solo developers. Run multiple AI coding 
   │  Services (Docker Compose)                     │
   │                                                │
   │  ┌──────────────────┐ ┌──────────────────┐     │
-  │  │ timescaledb :5432│ │ redis      :6379 │     │
+  │  │ postgres   :5432 │ │ redis      :6379 │     │
   │  └──────────────────┘ └──────────────────┘     │
   │  ┌──────────────────┐ ┌──────────────────┐     │
   │  │ traefik  :80/8080│ │ minio :9000/9001 │     │
@@ -155,18 +155,18 @@ All services (Adminer, Mailpit, MinIO console, etc.) are accessible at `http://<
 
 ## 3. Verify
 
-Once connected to the dev-box, verify the full stack works with the included example app — a FastAPI server with an HTML page that increments a hit counter stored in TimescaleDB.
+Once connected to the dev-box, verify the full stack works with the included example app — a FastAPI server with an HTML page that increments a hit counter stored in PostgreSQL.
 
 ```bash
-# Start TimescaleDB and the example app
+# Start PostgreSQL and the example app
 cd /workspace/.dev-infra
-docker compose up -d timescaledb obviously-the-best-hello-world-app
+docker compose up -d postgres obviously-the-best-hello-world-app
 
 # Open in your browser (use your host's IP)
 # http://<host-ip>:8000
 ```
 
-You'll see a counter with **Hit** and **Reset** buttons. Every click writes to TimescaleDB — the count persists across container restarts.
+You'll see a counter with **Hit** and **Reset** buttons. Every click writes to PostgreSQL — the count persists across container restarts.
 
 There's also a JSON API:
 
@@ -319,11 +319,11 @@ Skills marked with `/command` are user-invokable — type the command in Claude 
 |---------|------|---------|
 | dev-box | 2222 (SSH) | Ubuntu dev container — zsh, tmux, Node, Python, Java, Claude CLI, Gemini CLI |
 | Traefik | 80 / 8080 | Reverse proxy + dashboard (`*.localhost` routing) |
-| TimescaleDB | 5432 | PostgreSQL + TimescaleDB |
+| PostgreSQL | 5432 | PostgreSQL database |
 | Redis | 6379 | Cache, queues, rate limiting |
 | MinIO | 9000 / 9001 | S3-compatible object storage + console |
 | Mailpit | 8025 / 1025 | Email catcher (SMTP on 1025, web UI on 8025) |
-| Adminer | 8081 | Database GUI (pre-configured for TimescaleDB) |
+| Adminer | 8081 | Database GUI (pre-configured for PostgreSQL) |
 | Homepage | 3000 | Dashboard |
 | Dozzle | 9999 | Container log viewer |
 | Uptime Kuma | 3001 | Uptime monitoring |
@@ -343,7 +343,7 @@ Services are also available via `*.localhost`:
 | `mail.localhost` | Mailpit |
 | `minio.localhost` | MinIO Console |
 
-### Database (TimescaleDB)
+### Database (PostgreSQL)
 
 ```bash
 psql -h localhost -p 5432 -U devuser -d devdb
@@ -352,7 +352,7 @@ psql -h localhost -p 5432 -U devuser -d devdb
 open http://<host-ip>:8081
 ```
 
-Credentials are in `.env`. TimescaleDB extensions are available for time-series workloads.
+Credentials are in `.env`.
 
 ### Redis
 
@@ -404,7 +404,7 @@ Copy `.env.example` to `.env` and edit (or let `install.sh` generate it):
 
 - `PROJECTS_DIR` — host directory mounted as `/workspace` in dev-box
 - `BACKUP_DIR` — where database backups land
-- `DB_USER` / `DB_PASSWORD` / `DB_NAME` — TimescaleDB credentials
+- `DB_USER` / `DB_PASSWORD` / `DB_NAME` — PostgreSQL credentials
 - `MINIO_USER` / `MINIO_PASSWORD` — MinIO credentials
 - All ports are configurable — see `.env.example` for the full list
 - `TZ` — timezone
@@ -418,7 +418,7 @@ Run from `/workspace/.dev-infra`:
 | `make up` | Start all services |
 | `make down` | Stop all services |
 | `make up-devbox` | Start dev-box only |
-| `make up-database` | Start TimescaleDB + Redis |
+| `make up-database` | Start PostgreSQL + Redis |
 | `make up-monitoring` | Start homepage, watchtower, dozzle, uptime-kuma |
 | `make up-services` | Start traefik, minio, mailpit, adminer |
 | `make up-example` | Build & start the example hello world app |
