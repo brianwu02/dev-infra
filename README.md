@@ -144,7 +144,7 @@ The multi-terminal workflow is inspired by [Boris Cherny's AI terminal setup](ht
 
 ### Multi-Terminal (tmux + SSH)
 
-Add to `~/.zshrc` on your Mac. Requires `fzf` (`brew install fzf`) and a `devbox` entry in `~/.ssh/config` (see [Connect](#2-connect)).
+Add to `~/.zshrc` or `~/.bashrc` on your Mac. Requires `fzf` (`brew install fzf`) and a `devbox` entry in `~/.ssh/config` (see [Connect](#2-connect)).
 
 ```bash
 # ts — tmux session manager for the dev-box
