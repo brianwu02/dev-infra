@@ -66,6 +66,37 @@ code tunnel
 
 Follow the GitHub auth prompts. Then connect via `vscode.dev` or the VS Code desktop app using the [Remote Tunnels](https://marketplace.visualstudio.com/items?itemName=ms-vscode.remote-server) extension.
 
+### Remote Access (Tailscale)
+
+Want to code from a coffee shop? [Tailscale](https://tailscale.com/) creates a private WireGuard mesh network so your Mac can reach your dev box from anywhere — no port forwarding, no exposing SSH to the internet.
+
+```bash
+# On the host
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up
+
+# On your Mac
+brew install tailscale
+# Open Tailscale app, sign in with the same account
+```
+
+Once both devices are on your tailnet, use the Tailscale IP instead of your LAN IP:
+
+```bash
+ssh -p 2222 root@<tailscale-ip>
+```
+
+Update your `~/.ssh/config` accordingly:
+
+```
+Host devbox
+  HostName <tailscale-ip>   # e.g. 100.x.y.z
+  Port 2222
+  User root
+```
+
+All services (Adminer, Mailpit, MinIO console, etc.) are accessible at `http://<tailscale-ip>:<port>` — same as on your home network, but encrypted and works from anywhere. Free for personal use.
+
 ## 3. Verify
 
 Once connected to the dev-box, verify the full stack works with the included example app — a FastAPI server with an HTML page that increments a hit counter stored in TimescaleDB.
