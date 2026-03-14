@@ -138,9 +138,59 @@ cd your-project
 
 > **Path mapping:** `/workspace/myproject` inside the dev-box is actually `/home/docker/projects/myproject` on the host. When mounting volumes in docker commands from inside the dev-box, use host paths. The host filesystem is available at `/host_root/` for reference.
 
+## 5. Workflows
+
+The multi-terminal workflow is inspired by [Boris Cherny's AI terminal setup](https://youtu.be/julbw1JuAz0?si=Evag9oEPUgDUOWiK&t=2017), where he describes running multiple AI agents in parallel across tmux sessions.
+
+### Multi-Terminal (tmux + SSH aliases)
+
+Add to `~/.zshrc` on your Mac:
+
+```bash
+HOST_IP="192.168.1.200"  # Change to your host IP
+
+alias t1="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s1'"
+alias t2="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s2'"
+alias t3="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s3'"
+alias t4="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s4'"
+alias t5="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s5'"
+```
+
+#### iTerm2 multi-pane workflow
+
+1. Open iTerm2
+2. `⌘+D` to split vertically, `⌘+Shift+D` to split horizontally
+3. Run `t1` in the first pane, `t2` in the second, etc.
+4. `⌘+Option+←/→` to switch between panes
+5. `⌘+Shift+Enter` to zoom/unzoom a pane
+6. Disconnecting and re-running `t1`/`t2`/etc. reattaches to existing tmux sessions
+
+### Git Worktrees
+
+The shell includes three helpers for working on multiple branches simultaneously:
+
+```bash
+wt myproject task1     # create worktree + branch, cd into it
+wtl myproject          # list worktrees
+wtr myproject task1    # remove worktree
+```
+
+### AI CLI Tools
+
+Both are pre-installed in the dev-box. First run will prompt for API key configuration.
+
+```bash
+claude                    # Claude Code interactive mode
+claude "explain this" < file.py
+
+gemini                    # Gemini CLI interactive mode
+```
+
 ---
 
-## What You Get
+## Reference
+
+### What's Included
 
 | Service | Port | Purpose |
 |---------|------|---------|
@@ -169,10 +219,6 @@ Services are also available via `*.localhost`:
 | `db.localhost` | Adminer |
 | `mail.localhost` | Mailpit |
 | `minio.localhost` | MinIO Console |
-
----
-
-## Services Reference
 
 ### Database (TimescaleDB)
 
@@ -229,59 +275,7 @@ with smtplib.SMTP('localhost', 1025) as smtp:
 - **Retention**: 7 days (older backups auto-deleted)
 - **Format**: `pg_dump -Fc` + gzip (restore with `pg_restore`)
 
----
-
-## Workflows
-
-The multi-terminal workflow is inspired by [Boris Cherny's AI terminal setup](https://youtu.be/julbw1JuAz0?si=Evag9oEPUgDUOWiK&t=2017), where he describes running multiple AI agents in parallel across tmux sessions.
-
-### Multi-Terminal (tmux + SSH aliases)
-
-Add to `~/.zshrc` on your Mac:
-
-```bash
-HOST_IP="192.168.1.200"  # Change to your host IP
-
-alias t1="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s1'"
-alias t2="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s2'"
-alias t3="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s3'"
-alias t4="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s4'"
-alias t5="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s5'"
-```
-
-#### iTerm2 multi-pane workflow
-
-1. Open iTerm2
-2. `⌘+D` to split vertically, `⌘+Shift+D` to split horizontally
-3. Run `t1` in the first pane, `t2` in the second, etc.
-4. `⌘+Option+←/→` to switch between panes
-5. `⌘+Shift+Enter` to zoom/unzoom a pane
-6. Disconnecting and re-running `t1`/`t2`/etc. reattaches to existing tmux sessions
-
-### Git Worktrees
-
-The shell includes three helpers for working on multiple branches simultaneously:
-
-```bash
-wt myproject task1     # create worktree + branch, cd into it
-wtl myproject          # list worktrees
-wtr myproject task1    # remove worktree
-```
-
-### AI CLI Tools
-
-Both are pre-installed in the dev-box. First run will prompt for API key configuration.
-
-```bash
-claude                    # Claude Code interactive mode
-claude "explain this" < file.py
-
-gemini                    # Gemini CLI interactive mode
-```
-
----
-
-## Configuration
+### Configuration
 
 Copy `.env.example` to `.env` and edit (or let `install.sh` generate it):
 
@@ -292,7 +286,7 @@ Copy `.env.example` to `.env` and edit (or let `install.sh` generate it):
 - All ports are configurable — see `.env.example` for the full list
 - `TZ` — timezone
 
-## Makefile
+### Makefile
 
 Run from `/workspace/.dev-infra`:
 
