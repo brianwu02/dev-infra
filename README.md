@@ -142,33 +142,69 @@ cd your-project
 
 The multi-terminal workflow is inspired by [Boris Cherny's AI terminal setup](https://youtu.be/julbw1JuAz0?si=Evag9oEPUgDUOWiK&t=2017), where he describes running multiple AI agents in parallel across tmux sessions.
 
-### Multi-Terminal (tmux + SSH aliases)
+### Multi-Terminal (tmux + SSH)
 
-Add to `~/.zshrc` on your Mac:
+Add to `~/.zshrc` on your Mac. Requires `fzf` (`brew install fzf`) and a `devbox` entry in `~/.ssh/config` (see [Connect](#2-connect)).
 
 ```bash
-HOST_IP="<host-ip>"  # Change to your host IP (or Tailscale IP)
+# ts — tmux session manager for the dev-box
+#
+# Usage:
+#   ts                  Interactive picker (fzf) — list existing sessions or create new
+#   ts my-feature       Jump straight into session "my-feature" (creates if needed)
+#
+# Sessions persist on the dev-box. Disconnect (close terminal, lose wifi)
+# and reattach later — everything is exactly where you left it.
+ts() {
+  if [ -n "$1" ]; then
+    echo "Connecting to session: $1..."
+    ssh devbox -t "tmux new-session -A -s \"$1\""
+    return 0
+  fi
 
-# Each alias SSHs into the dev-box and attaches to a named tmux session.
-# If the session doesn't exist, it creates one. If it does, it reattaches.
-# This means you can disconnect (close the terminal, lose wifi, etc.)
-# and pick up exactly where you left off by running the same alias.
-# Run t1-t5 in separate iTerm2 panes for parallel AI agent sessions.
-alias t1="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s1'"
-alias t2="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s2'"
-alias t3="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s3'"
-alias t4="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s4'"
-alias t5="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s5'"
+  echo "Fetching sessions from dev-box..."
+  local sessions=$(ssh devbox "tmux ls -F '#{session_name}' 2>/dev/null")
+
+  local menu_items
+  if [ -z "$sessions" ]; then
+    menu_items="[Create New Session]"
+  else
+    menu_items=$(printf "[Create New Session]\n%s" "$sessions")
+  fi
+
+  local selected=$(echo "$menu_items" | fzf --prompt="Dev-Box Tmux > " --height=40% --layout=reverse --border --cycle)
+
+  if [ "$selected" = "[Create New Session]" ]; then
+    printf "Enter a name for the new session: "
+    read new_name </dev/tty
+    if [ -n "$new_name" ]; then
+      ssh devbox -t "tmux new-session -A -s \"$new_name\""
+    fi
+  elif [ -n "$selected" ]; then
+    ssh devbox -t "tmux attach-session -d -t \"$selected\""
+  fi
+}
+```
+
+**Simple alternative** — if you don't want fzf, use static aliases instead:
+
+```bash
+# Fixed sessions s1-s5 for quick multi-pane setups
+alias t1="ssh devbox -t 'tmux new-session -As s1'"
+alias t2="ssh devbox -t 'tmux new-session -As s2'"
+alias t3="ssh devbox -t 'tmux new-session -As s3'"
+alias t4="ssh devbox -t 'tmux new-session -As s4'"
+alias t5="ssh devbox -t 'tmux new-session -As s5'"
 ```
 
 #### iTerm2 multi-pane workflow
 
 1. Open iTerm2
 2. `⌘+D` to split vertically, `⌘+Shift+D` to split horizontally
-3. Run `t1` in the first pane, `t2` in the second, etc.
+3. Run `ts agent-1` in the first pane, `ts agent-2` in the second, etc.
 4. `⌘+Option+←/→` to switch between panes
 5. `⌘+Shift+Enter` to zoom/unzoom a pane
-6. Disconnecting and re-running `t1`/`t2`/etc. reattaches to existing tmux sessions
+6. Disconnecting and re-running `ts` reattaches to existing sessions
 
 ### Git Worktrees
 
