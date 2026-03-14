@@ -2,8 +2,6 @@
 
 An AI-first development environment for solo developers. Run multiple AI coding agents (Claude, Gemini) in parallel across tmux sessions, with all the infrastructure you need to ship — database, cache, object storage, email, reverse proxy, and monitoring. One `./install.sh` on any Ubuntu/Debian host.
 
-![demo](demo.gif)
-
 ## Prerequisites
 
 - A running **Ubuntu/Debian machine** with root access. This repo does not cover provisioning or setting up the host itself.
@@ -145,6 +143,8 @@ cd your-project
 The multi-terminal workflow is inspired by [Boris Cherny's AI terminal setup](https://youtu.be/julbw1JuAz0?si=Evag9oEPUgDUOWiK&t=2017), where he describes running multiple AI agents in parallel across tmux sessions.
 
 ### Multi-Terminal (tmux + SSH)
+
+![demo](demo.gif)
 
 Add to `~/.zshrc` or `~/.bashrc` on your Mac. Requires `fzf` (`brew install fzf`) and a `devbox` entry in `~/.ssh/config` (see [Connect](#2-connect)).
 
