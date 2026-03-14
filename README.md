@@ -2,9 +2,16 @@
 
 Reproducible dev environment: a Docker-outside-of-Docker (DooD) dev container with database, caching, object storage, email catching, reverse proxy, and monitoring. One command to install on any Ubuntu/Debian host.
 
+## Assumptions
+
+- **You have a Linux machine** — Ubuntu/Debian with root access, already provisioned. This repo does not cover setting up the host itself.
+- **All projects live in `/workspace`** — The host's `PROJECTS_DIR` (default `/home/docker/projects`) is bind-mounted into the dev-box as `/workspace`. Clone repos here. This is your working directory.
+- **You develop inside the dev-box, not on the host** — The dev-box container is your dev environment. The host just runs Docker. You SSH into the dev-box (port 2222), not the host, for day-to-day work.
+- **Paths inside dev-box ≠ host paths** — `/workspace/myproject` inside dev-box is actually `/home/docker/projects/myproject` on the host. When mounting volumes in docker commands, use host paths (the host filesystem is available at `/host_root/` for reference).
+
 ## Quick Start
 
-**Prerequisites:** A running Ubuntu/Debian machine with root access. This guide does not cover provisioning or setting up the host itself — just what runs on top of it.
+**Prerequisites:** A running Ubuntu/Debian machine with root access.
 
 ```bash
 # 1. Generate an SSH key if you don't have one
@@ -184,15 +191,31 @@ gemini --help             # Full options
 
 Both are pre-installed in the dev-box. First run will prompt for API key configuration.
 
-### VS Code Tunnel
+### VS Code
 
-Run inside dev-box to get VS Code access from any browser:
+There are two ways to connect VS Code to the dev-box:
+
+**Option A: VS Code Remote SSH** (simplest)
+
+1. Install the [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh) extension
+2. Add this to your SSH config (`~/.ssh/config` on your Mac):
+   ```
+   Host devbox
+     HostName <host-ip>
+     Port 2222
+     User root
+   ```
+3. In VS Code: `Cmd+Shift+P` → "Remote-SSH: Connect to Host" → select `devbox`
+4. Open `/workspace` as your folder
+
+**Option B: VS Code Tunnel** (works from any browser, no SSH config needed)
 
 ```bash
+# Inside the dev-box
 code tunnel
 ```
 
-Follow the auth prompts. Then connect via `vscode.dev` or the VS Code desktop app using the Remote Tunnels extension.
+Follow the GitHub auth prompts. Then connect via `vscode.dev` or the VS Code desktop app using the [Remote Tunnels](https://marketplace.visualstudio.com/items?itemName=ms-vscode.remote-server) extension.
 
 ### Database
 
