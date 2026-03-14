@@ -233,6 +233,8 @@ with smtplib.SMTP('localhost', 1025) as smtp:
 
 ## Workflows
 
+The multi-terminal workflow is inspired by [Boris Cherny's AI terminal setup](https://youtu.be/julbw1JuAz0?si=Evag9oEPUgDUOWiK&t=2017), where he describes running multiple AI agents in parallel across tmux sessions.
+
 ### Multi-Terminal (tmux + SSH aliases)
 
 Add to `~/.zshrc` on your Mac:
