@@ -5,20 +5,28 @@ Reproducible dev environment: a Docker-outside-of-Docker (DooD) dev container wi
 ## Quick Start
 
 ```bash
-# 1. Copy your SSH key to the host (if you haven't already)
+# 1. Generate an SSH key if you don't have one
+[ -f ~/.ssh/id_ed25519 ] || ssh-keygen -t ed25519
+
+# 2. Copy your key to the host
 ssh-copy-id root@<host-ip>
 
-# 2. Install on the host
+# 3. Install on the host
 ssh root@<host-ip>
 git clone https://github.com/brianwu02/dev-infra.git
 cd dev-infra
 sudo ./install.sh
 
-# 3. SSH into the dev-box
+# 4. SSH into the dev-box
 ssh -p 2222 root@<host-ip>
 ```
 
 > **Note:** The dev-box only accepts SSH key auth (no passwords). The installer copies keys from the host's `~/.ssh/authorized_keys` into the dev-box automatically. If you can SSH into the host, you can SSH into the dev-box.
+>
+> If `ssh-copy-id` fails (host has password auth disabled), manually append your key:
+> ```bash
+> cat ~/.ssh/id_ed25519.pub | ssh root@<host-ip> "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+> ```
 
 ## Try It
 
