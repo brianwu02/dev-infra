@@ -16,17 +16,30 @@ ssh -p 2222 root@<host-ip>
 
 ## Try It
 
-The included example app proves the full stack works — a FastAPI server that increments a hit counter in TimescaleDB:
+The included example app proves the full stack works end-to-end — a FastAPI server with an HTML page that increments a hit counter stored in TimescaleDB.
 
 ```bash
+# 1. Start the infrastructure (DB must be healthy first)
+make up-database
+
+# 2. Build and start the example app
 make up-example
-curl -X POST http://localhost:8000/hit   # {"message": "Obviously the best hit counter", "hits": 1}
-curl -X POST http://localhost:8000/hit   # {"message": "Obviously the best hit counter", "hits": 2}
-curl http://localhost:8000               # {"message": "Hello from obviously-the-best-hello-world-app", "hits": 2}
-curl -X POST http://localhost:8000/reset # {"message": "Counter reset", "hits": 0}
+
+# 3. Open in your browser
+open http://localhost:8000
 ```
 
-The counter persists across container restarts (stored in TimescaleDB). When you're done: `make down-example`
+You'll see a counter with **Hit** and **Reset** buttons. Every click writes to TimescaleDB — the count persists across container restarts.
+
+There's also a JSON API if you prefer curl:
+
+```bash
+curl http://localhost:8000/api              # read counter
+curl -X POST http://localhost:8000/api/hit   # increment
+curl -X POST http://localhost:8000/api/reset # reset to zero
+```
+
+When you're done: `make down-example`
 
 ## What You Get
 
