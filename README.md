@@ -231,6 +231,8 @@ gemini                    # Gemini CLI interactive mode
 
 ### AI Skills
 
+![skills demo](demo-skills.gif)
+
 The example app includes `.claude/` and `.gemini/` skill directories — pre-configured instructions that teach AI agents how to work with your codebase. Skills are inspired by [everything-claude-code](https://github.com/affaan-m/everything-claude-code).
 
 ```
