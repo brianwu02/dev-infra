@@ -1,0 +1,118 @@
+services:
+  dev-box:
+    image: ubuntu:22.04
+    container_name: dev-box
+    network_mode: host
+    privileged: true
+    labels:
+      - com.centurylinklabs.watchtower.enable=false
+    environment:
+      - TZ=${TZ:-America/New_York}
+    volumes:
+      - ${PROJECTS_DIR:-/home/docker/projects}:/workspace
+      - /:/host_root
+      - vscode-cli:/root/.vscode-cli
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+    command: ["/bin/bash", "/workspace/.woozy-dev-infra/init_devbox.sh"]
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg15
+    container_name: timescaledb
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DB_USER:-devuser}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-changeme}
+      - POSTGRES_DB=${DB_NAME:-devdb}
+    volumes:
+      - timescaledb-data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    mem_limit: 1g
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-devuser}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    restart: unless-stopped
+    ports:
+      - ${HOMEPAGE_PORT:-3000}:3000
+    environment:
+      - HOMEPAGE_ALLOWED_HOSTS=${HOMEPAGE_ALLOWED_HOSTS:-*}
+    volumes:
+      - homepage-config:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    mem_limit: 128m
+
+  netdata:
+    image: netdata/netdata
+    container_name: netdata
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - NETDATA_EXTRA_HTTPS_ORIGIN=*
+      - NETDATA_DISABLE_CLOUD=1
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - netdataconfig:/etc/netdata
+      - netdatalib:/var/lib/netdata
+      - netdatacache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    mem_limit: 512m
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    environment:
+      - WATCHTOWER_MONITOR_ONLY=true
+      - WATCHTOWER_SCHEDULE=0 0 4 * * *
+      - WATCHTOWER_CLEANUP=false
+      - WATCHTOWER_INCLUDE_STOPPED=false
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - com.centurylinklabs.watchtower.enable=false
+    mem_limit: 64m
+
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    restart: unless-stopped
+    ports:
+      - ${DOZZLE_PORT:-9999}:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    mem_limit: 64m
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: unless-stopped
+    ports:
+      - ${KUMA_PORT:-3001}:3001
+    volumes:
+      - uptime-kuma-data:/app/data
+    mem_limit: 128m
+
+volumes:
+  vscode-cli:
+  timescaledb-data:
+  homepage-config:
+  netdataconfig:
+  netdatalib:
+  netdatacache:
+  uptime-kuma-data:

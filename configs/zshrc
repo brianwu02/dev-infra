@@ -1,0 +1,33 @@
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="robbyrussell"
+plugins=(git)
+source $ZSH/oh-my-zsh.sh
+
+# Convenience
+alias docker-compose='docker compose'
+
+# Worktree helper: usage: wt myproject task1
+wt() {
+  local project=$1 task=$2
+  local dir="/workspace/${project}-${task}"
+  if [ ! -d "$dir" ]; then
+    git -C "/workspace/${project}" worktree add "$dir" -b "$task"
+  fi
+  cd "$dir"
+}
+
+# Worktree cleanup: usage: wtr myproject task1
+wtr() {
+  local project=$1 task=$2
+  local dir="/workspace/${project}-${task}"
+  git -C "/workspace/${project}" worktree remove "$dir"
+}
+
+# List worktrees: usage: wtl myproject
+wtl() {
+  git -C "/workspace/${1}" worktree list
+}
+
+export COLORTERM=truecolor
+export TERM=xterm-256color
+export PATH="$HOME/.local/bin:$PATH"
