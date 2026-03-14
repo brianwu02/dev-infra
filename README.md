@@ -2,6 +2,8 @@
 
 An AI-first development environment for solo developers. Run multiple AI coding agents (Claude, Gemini) in parallel across tmux sessions, with all the infrastructure you need to ship — database, cache, object storage, email, reverse proxy, and monitoring. One `./install.sh` on any Ubuntu/Debian host.
 
+![demo](demo.gif)
+
 ## Prerequisites
 
 - A running **Ubuntu/Debian machine** with root access. This repo does not cover provisioning or setting up the host itself.
