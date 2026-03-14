@@ -32,17 +32,17 @@ ssh -p 2222 root@<host-ip>
 
 ## Try It
 
-The included example app proves the full stack works end-to-end — a FastAPI server with an HTML page that increments a hit counter stored in TimescaleDB.
+Once you're inside the dev-box (`ssh -p 2222 root@<host-ip>`), verify the full stack works with the included example app — a FastAPI server with an HTML page that increments a hit counter stored in TimescaleDB.
 
 ```bash
-# 1. Start the infrastructure (DB must be healthy first)
-make up-database
+# 1. cd into the infra directory
+cd /workspace/.dev-infra
 
-# 2. Build and start the example app
-make up-example
+# 2. Start TimescaleDB and the example app
+docker compose up -d timescaledb obviously-the-best-hello-world-app
 
-# 3. Open in your browser
-open http://localhost:8000
+# 3. Open in your browser (use your host's IP)
+# http://<host-ip>:8000
 ```
 
 You'll see a counter with **Hit** and **Reset** buttons. Every click writes to TimescaleDB — the count persists across container restarts.
@@ -55,7 +55,11 @@ curl -X POST http://localhost:8000/api/hit   # increment
 curl -X POST http://localhost:8000/api/reset # reset to zero
 ```
 
-When you're done: `make down-example`
+When you're done:
+
+```bash
+docker compose stop obviously-the-best-hello-world-app
+```
 
 ## What You Get
 
