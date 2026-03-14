@@ -48,6 +48,23 @@ Reproducible dev environment: DooD (Docker-outside-of-Docker) dev container with
 └──────────────────────────────────────────────────────────┘
 ```
 
+### Why DooD (Docker-outside-of-Docker)?
+
+The dev-box container runs Docker commands by mounting the host's `/var/run/docker.sock`. This means containers launched from inside dev-box are **siblings** on the host, not nested children.
+
+| | DooD (this setup) | DinD (docker-in-docker) |
+|-|---|---|
+| **Performance** | Native — no nested overhead | Extra layer of virtualization |
+| **Port access** | `localhost` just works — dev-box uses host networking | Containers live in a nested network, need extra port mapping |
+| **Volume mounts** | Paths must be host paths (not dev-box paths) | Paths are relative to the inner daemon |
+| **Image cache** | Shared with host — pull once, use everywhere | Separate cache per DinD instance |
+| **Security** | Socket access = root on host (fine for a personal dev box) | More isolated but slower and more complex |
+| **Compose/Swarm** | Full access to host Docker engine | Needs privileged mode, still can't manage host containers |
+
+**TL;DR**: DooD is simpler and faster for a single-dev setup where you trust the environment. DinD is better when you need full isolation (CI runners, multi-tenant). Since this is your personal dev box, DooD is the right call.
+
+One gotcha: when you `docker run -v /some/path:/data` from inside dev-box, `/some/path` must exist **on the host**, not inside the container. The host filesystem is mounted at `/host_root/` for reference.
+
 ## Quick Start
 
 ```bash
