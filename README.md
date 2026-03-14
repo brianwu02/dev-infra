@@ -7,6 +7,62 @@ An AI-first development environment for solo developers. Run multiple AI coding 
 - A running **Ubuntu/Debian machine** with root access. This repo does not cover provisioning or setting up the host itself.
 - An **SSH key** on your local machine (Mac/Linux).
 
+## Architecture
+
+```
+  Mac (Client)
+  ┌────────────────────────────────────────────────┐
+  │  iTerm2 panes: t1, t2, t3, t4, t5             │
+  └──────┬─────┬─────┬─────┬─────┬────────────────┘
+         │ SSH │     │     │     │
+         ▼     ▼     ▼     ▼     ▼
+
+  Host (Ubuntu/Debian)
+  ┌────────────────────────────────────────────────┐
+  │                                                │
+  │  dev-box (host network, :2222)                 │
+  │  ┌──────────────────────────────────────────┐  │
+  │  │  zsh + tmux + oh-my-zsh                  │  │
+  │  │  claude / gemini CLI                     │  │
+  │  │  git worktrees                           │  │
+  │  │  VS Code tunnel                          │  │
+  │  │  docker CLI ──► host docker.sock (DooD)  │  │
+  │  └──────────────────────────────────────────┘  │
+  │                                                │
+  │  Services (Docker Compose)                     │
+  │  ┌──────────────┐  ┌──────────────┐            │
+  │  │ timescaledb   │  │ redis        │            │
+  │  │ :5432         │  │ :6379        │            │
+  │  ├──────────────┤  ├──────────────┤            │
+  │  │ traefik       │  │ minio        │            │
+  │  │ :80 / :8080   │  │ :9000 / :9001│            │
+  │  ├──────────────┤  ├──────────────┤            │
+  │  │ mailpit       │  │ adminer      │            │
+  │  │ :8025 / :1025 │  │ :8081        │            │
+  │  ├──────────────┤  ├──────────────┤            │
+  │  │ homepage      │  │ dozzle       │            │
+  │  │ :3000         │  │ :9999        │            │
+  │  ├──────────────┤  ├──────────────┤            │
+  │  │ uptime-kuma   │  │ watchtower   │            │
+  │  │ :3001         │  │ (no port)    │            │
+  │  └──────────────┘  └──────────────┘            │
+  └────────────────────────────────────────────────┘
+```
+
+### Why DooD (Docker-outside-of-Docker)?
+
+The dev-box runs Docker commands by mounting the host's `/var/run/docker.sock`. Containers launched from inside dev-box are **siblings** on the host, not nested children.
+
+| | DooD (this setup) | DinD (docker-in-docker) |
+|-|---|---|
+| **Performance** | Native — no nested overhead | Extra virtualization layer |
+| **Port access** | `localhost` just works (host networking) | Nested network, extra port mapping |
+| **Volume mounts** | Paths must be host paths | Relative to inner daemon |
+| **Image cache** | Shared with host | Separate cache per instance |
+| **Security** | Socket = root on host (fine for personal dev) | More isolated but slower |
+
+**TL;DR**: DooD is simpler and faster for a single-dev setup. DinD is better for CI runners or multi-tenant isolation.
+
 ## 1. Install
 
 ```bash
@@ -372,65 +428,3 @@ Run from `/workspace/.dev-infra`:
 | `make health` | Run full health check |
 | `make backup-db` | Manual database backup |
 
----
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  Mac (Client)                                           │
-│  ┌──────────────────────────────────────────────────┐   │
-│  │ iTerm2 split panes                               │   │
-│  │  t1 ──┐  t2 ──┐  t3 ──┐  t4 ──┐  t5 ──┐       │   │
-│  │       │       │       │       │       │        │   │
-│  └───────┼───────┼───────┼───────┼───────┼────────┘   │
-│          │ SSH   │ SSH   │ SSH   │ SSH   │ SSH        │
-└──────────┼───────┼───────┼───────┼───────┼────────────┘
-           ▼       ▼       ▼       ▼       ▼
-┌──────────────────────────────────────────────────────────┐
-│  Host (Ubuntu/Debian)          docker.sock               │
-│  ┌─────────────────────────────────┬────────────────┐    │
-│  │ dev-box (host network, :2222)   │ Docker Engine   │    │
-│  │  tmux sessions (s1–s5)          │                 │    │
-│  │  zsh + oh-my-zsh                │  ┌───────────┐  │    │
-│  │  claude / gemini CLI            │  │timescaledb │  │    │
-│  │  git worktrees                  │  │  :5432     │  │    │
-│  │  VS Code tunnel                 │  ├───────────┤  │    │
-│  │                                 │  │  redis    │  │    │
-│  │  docker CLI ─────────────────►  │  │  :6379    │  │    │
-│  │         (DooD via socket)       │  ├───────────┤  │    │
-│  │                                 │  │  minio    │  │    │
-│  │                                 │  │  :9000/01 │  │    │
-│  │                                 │  ├───────────┤  │    │
-│  │                                 │  │ traefik   │  │    │
-│  │                                 │  │  :80/8080 │  │    │
-│  │                                 │  ├───────────┤  │    │
-│  │                                 │  │ mailpit   │  │    │
-│  │                                 │  │  :8025    │  │    │
-│  │                                 │  ├───────────┤  │    │
-│  │                                 │  │ homepage  │  │    │
-│  │                                 │  │  :3000    │  │    │
-│  │                                 │  ├───────────┤  │    │
-│  │                                 │  │ dozzle    │  │    │
-│  │                                 │  │  :9999    │  │    │
-│  │                                 │  ├───────────┤  │    │
-│  │                                 │  │uptime-kuma│  │    │
-│  │                                 │  │  :3001    │  │    │
-│  └─────────────────────────────────┴───────────────┘  │    │
-└──────────────────────────────────────────────────────────┘
-```
-
-### Why DooD (Docker-outside-of-Docker)?
-
-The dev-box container runs Docker commands by mounting the host's `/var/run/docker.sock`. This means containers launched from inside dev-box are **siblings** on the host, not nested children.
-
-| | DooD (this setup) | DinD (docker-in-docker) |
-|-|---|---|
-| **Performance** | Native — no nested overhead | Extra layer of virtualization |
-| **Port access** | `localhost` just works — dev-box uses host networking | Containers live in a nested network, need extra port mapping |
-| **Volume mounts** | Paths must be host paths (not dev-box paths) | Paths are relative to the inner daemon |
-| **Image cache** | Shared with host — pull once, use everywhere | Separate cache per DinD instance |
-| **Security** | Socket access = root on host (fine for a personal dev box) | More isolated but slower and more complex |
-| **Compose/Swarm** | Full access to host Docker engine | Needs privileged mode, still can't manage host containers |
-
-**TL;DR**: DooD is simpler and faster for a single-dev setup where you trust the environment. DinD is better when you need full isolation (CI runners, multi-tenant). Since this is your personal dev box, DooD is the right call.
