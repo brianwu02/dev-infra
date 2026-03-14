@@ -1,6 +1,6 @@
 # dev-infra
 
-Reproducible dev environment: DooD (Docker-outside-of-Docker) dev container with monitoring, database, and AI CLI tools. One command to install on any Ubuntu/Debian host.
+Reproducible dev environment: DooD (Docker-outside-of-Docker) dev container with database, caching, object storage, email catching, reverse proxy, and monitoring. One command to install on any Ubuntu/Debian host.
 
 ## Architecture
 
@@ -24,19 +24,26 @@ Reproducible dev environment: DooD (Docker-outside-of-Docker) dev container with
 │  │  claude / gemini CLI            │  │timescaledb │  │    │
 │  │  git worktrees                  │  │  :5432     │  │    │
 │  │  VS Code tunnel                 │  ├───────────┤  │    │
-│  │                                 │  │ homepage  │  │    │
-│  │  docker CLI ─────────────────►  │  │  :3000    │  │    │
+│  │                                 │  │  redis    │  │    │
+│  │  docker CLI ─────────────────►  │  │  :6379    │  │    │
 │  │         (DooD via socket)       │  ├───────────┤  │    │
-│  │                                 │  │ netdata   │  │    │
-│  │                                 │  │  :19999   │  │    │
+│  │                                 │  │  minio    │  │    │
+│  │                                 │  │  :9000/01 │  │    │
+│  │                                 │  ├───────────┤  │    │
+│  │                                 │  │ traefik   │  │    │
+│  │                                 │  │  :80/8080 │  │    │
+│  │                                 │  ├───────────┤  │    │
+│  │                                 │  │ mailpit   │  │    │
+│  │                                 │  │  :8025    │  │    │
+│  │                                 │  ├───────────┤  │    │
+│  │                                 │  │ homepage  │  │    │
+│  │                                 │  │  :3000    │  │    │
 │  │                                 │  ├───────────┤  │    │
 │  │                                 │  │ dozzle    │  │    │
 │  │                                 │  │  :9999    │  │    │
 │  │                                 │  ├───────────┤  │    │
 │  │                                 │  │uptime-kuma│  │    │
 │  │                                 │  │  :3001    │  │    │
-│  │                                 │  ├───────────┤  │    │
-│  │                                 │  │watchtower │  │    │
 │  └─────────────────────────────────┴───────────────┘  │    │
 └──────────────────────────────────────────────────────────┘
 ```
@@ -58,12 +65,29 @@ ssh -p 2222 root@<host-ip>
 | Service | Port | Purpose |
 |---------|------|---------|
 | dev-box | 2222 (SSH) | Ubuntu dev container — zsh, tmux, Node, Python, Java, Claude CLI, Gemini CLI |
+| Traefik | 80 / 8080 | Reverse proxy + dashboard (`*.localhost` routing) |
 | TimescaleDB | 5432 | PostgreSQL + TimescaleDB |
+| Redis | 6379 | Cache, queues, rate limiting |
+| MinIO | 9000 / 9001 | S3-compatible object storage + console |
+| Mailpit | 8025 / 1025 | Email catcher (SMTP on 1025, web UI on 8025) |
+| Adminer | 8081 | Database GUI (pre-configured for TimescaleDB) |
 | Homepage | 3000 | Dashboard |
-| Netdata | 19999 | System monitoring |
 | Dozzle | 9999 | Container log viewer |
 | Uptime Kuma | 3001 | Uptime monitoring |
-| Watchtower | — | Image update monitor (no auto-pull) |
+| Watchtower | — | Auto-pulls image updates daily at 4 AM |
+
+### Traefik Routes
+
+When accessing from the host machine, services are also available via `*.localhost`:
+
+| Route | Service |
+|-------|---------|
+| `home.localhost` | Homepage |
+| `logs.localhost` | Dozzle |
+| `status.localhost` | Uptime Kuma |
+| `db.localhost` | Adminer |
+| `mail.localhost` | Mailpit |
+| `minio.localhost` | MinIO Console |
 
 ## Configuration
 
@@ -72,7 +96,8 @@ Copy `.env.example` to `.env` and edit (or let `install.sh` generate it):
 - `PROJECTS_DIR` — host directory mounted as `/workspace` in dev-box
 - `BACKUP_DIR` — where database backups land
 - `DB_USER` / `DB_PASSWORD` / `DB_NAME` — TimescaleDB credentials
-- `DB_PORT` / `HOMEPAGE_PORT` / `DOZZLE_PORT` / `KUMA_PORT` — exposed ports
+- `MINIO_USER` / `MINIO_PASSWORD` — MinIO credentials
+- All ports are configurable — see `.env.example` for the full list
 - `TZ` — timezone
 
 ## Mac Client Setup
@@ -146,40 +171,66 @@ code tunnel
 
 Follow the auth prompts. Then connect via `vscode.dev` or the VS Code desktop app using the Remote Tunnels extension.
 
-## Monitoring Endpoints
-
-| Service | URL | Notes |
-|---------|-----|-------|
-| Homepage | http://HOST:3000 | Dashboard — configure widgets in the homepage volume |
-| Netdata | http://HOST:19999 | Real-time system metrics |
-| Dozzle | http://HOST:9999 | Container log viewer |
-| Uptime Kuma | http://HOST:3001 | Needs initial setup via web UI on first visit |
-
 ## Database
 
 ```bash
-# From inside dev-box
+# From inside dev-box or host
 psql -h localhost -p 5432 -U devuser -d devdb
 
-# From host
-psql -h localhost -p 5432 -U devuser -d devdb
+# Or use the Adminer GUI
+open http://localhost:8081
 ```
 
 Credentials are in `.env`. TimescaleDB extensions are available for time-series workloads.
+
+## Redis
+
+```bash
+redis-cli -h localhost -p 6379
+```
+
+Pre-configured with 128MB max memory and LRU eviction. Ready for caching, job queues (Celery/BullMQ), sessions, and rate limiting.
+
+## Object Storage (MinIO)
+
+S3-compatible API on port 9000, web console on port 9001. Use the same `boto3` / `@aws-sdk/client-s3` code you'd use with AWS S3.
+
+```bash
+# Console
+open http://localhost:9001  # login: minioadmin / minioadmin
+
+# Example: Python
+import boto3
+s3 = boto3.client('s3', endpoint_url='http://localhost:9000',
+    aws_access_key_id='minioadmin', aws_secret_access_key='minioadmin')
+```
+
+## Email (Mailpit)
+
+SMTP server on port 1025, web UI on port 8025. Point your app's email config at `localhost:1025` and all outgoing mail lands in the Mailpit inbox.
+
+```bash
+# Web UI
+open http://localhost:8025
+
+# Example: Python
+import smtplib
+with smtplib.SMTP('localhost', 1025) as smtp:
+    smtp.sendmail('test@app.dev', 'user@example.com', 'Subject: Test\n\nHello')
+```
 
 ## Makefile
 
 | Command | Description |
 |---------|-------------|
-| `make up` | Start all 7 services |
+| `make up` | Start all services |
 | `make down` | Stop all services |
 | `make up-devbox` | Start dev-box only |
-| `make up-database` | Start TimescaleDB only |
-| `make up-monitoring` | Start homepage, netdata, watchtower, dozzle, uptime-kuma |
+| `make up-database` | Start TimescaleDB + Redis |
+| `make up-monitoring` | Start homepage, watchtower, dozzle, uptime-kuma |
+| `make up-services` | Start traefik, minio, mailpit, adminer |
 | `make ps` | Show container status |
 | `make logs` | Recent logs from all containers |
-| `make logs-devbox` | Follow dev-box logs |
-| `make logs-timescaledb` | Follow TimescaleDB logs |
 | `make health` | Run full health check |
 | `make backup-db` | Manual database backup |
 

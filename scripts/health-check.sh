@@ -12,7 +12,7 @@ warn() { echo -e "  ${YELLOW}WARN${NC}  $1"; }
 fail() { echo -e "  ${RED}FAIL${NC}  $1"; }
 
 echo "=== Container Health ==="
-EXPECTED="dev-box timescaledb homepage netdata watchtower dozzle uptime-kuma"
+EXPECTED="dev-box traefik timescaledb redis minio mailpit adminer homepage watchtower dozzle uptime-kuma"
 for c in $EXPECTED; do
     status=$(docker inspect -f '{{.State.Status}}' "$c" 2>/dev/null || echo "missing")
     if [ "$status" = "running" ]; then
@@ -55,10 +55,13 @@ check_url() {
         fail "$name ($url)"
     fi
 }
+check_url "Traefik"     "http://localhost:8080/api/overview"
 check_url "Homepage"    "http://localhost:3000"
-check_url "Netdata"     "http://localhost:19999"
 check_url "Dozzle"      "http://localhost:9999"
 check_url "Uptime Kuma" "http://localhost:3001"
+check_url "Adminer"     "http://localhost:8081"
+check_url "Mailpit"     "http://localhost:8025"
+check_url "MinIO"       "http://localhost:9001"
 
 echo ""
 echo "=== Database ==="
@@ -67,6 +70,14 @@ if docker exec "$DB_CONTAINER" pg_isready -U "${DB_USER:-devuser}" -q 2>/dev/nul
     ok "TimescaleDB accepting connections"
 else
     fail "TimescaleDB not ready"
+fi
+
+echo ""
+echo "=== Redis ==="
+if docker exec redis redis-cli ping 2>/dev/null | grep -q PONG; then
+    ok "Redis accepting connections"
+else
+    fail "Redis not ready"
 fi
 
 echo ""

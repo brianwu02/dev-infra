@@ -1,9 +1,11 @@
 COMPOSE = docker compose
 DIR     = $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
-.PHONY: up down ps logs health backup-db up-devbox up-monitoring up-database \
-        down-devbox down-monitoring down-database \
-        logs-devbox logs-timescaledb logs-homepage logs-netdata logs-dozzle logs-uptime-kuma logs-watchtower
+.PHONY: up down ps logs health backup-db \
+        up-devbox up-monitoring up-database up-services \
+        down-devbox down-monitoring down-database down-services \
+        logs-devbox logs-timescaledb logs-homepage logs-dozzle logs-uptime-kuma logs-watchtower \
+        logs-traefik logs-redis logs-minio logs-mailpit logs-adminer
 
 # ---------- All services ----------
 
@@ -19,19 +21,25 @@ up-devbox:
 	$(COMPOSE) -f $(DIR)/docker-compose.yml up -d dev-box
 
 up-database:
-	$(COMPOSE) -f $(DIR)/docker-compose.yml up -d timescaledb
+	$(COMPOSE) -f $(DIR)/docker-compose.yml up -d timescaledb redis
 
 up-monitoring:
-	$(COMPOSE) -f $(DIR)/docker-compose.yml up -d homepage netdata watchtower dozzle uptime-kuma
+	$(COMPOSE) -f $(DIR)/docker-compose.yml up -d homepage watchtower dozzle uptime-kuma
+
+up-services:
+	$(COMPOSE) -f $(DIR)/docker-compose.yml up -d traefik minio mailpit adminer
 
 down-devbox:
 	$(COMPOSE) -f $(DIR)/docker-compose.yml stop dev-box
 
 down-database:
-	$(COMPOSE) -f $(DIR)/docker-compose.yml stop timescaledb
+	$(COMPOSE) -f $(DIR)/docker-compose.yml stop timescaledb redis
 
 down-monitoring:
-	$(COMPOSE) -f $(DIR)/docker-compose.yml stop homepage netdata watchtower dozzle uptime-kuma
+	$(COMPOSE) -f $(DIR)/docker-compose.yml stop homepage watchtower dozzle uptime-kuma
+
+down-services:
+	$(COMPOSE) -f $(DIR)/docker-compose.yml stop traefik minio mailpit adminer
 
 # ---------- Status ----------
 
@@ -49,11 +57,11 @@ logs-devbox:
 logs-timescaledb:
 	$(COMPOSE) -f $(DIR)/docker-compose.yml logs --tail 50 -f timescaledb
 
+logs-redis:
+	$(COMPOSE) -f $(DIR)/docker-compose.yml logs --tail 50 -f redis
+
 logs-homepage:
 	$(COMPOSE) -f $(DIR)/docker-compose.yml logs --tail 50 -f homepage
-
-logs-netdata:
-	$(COMPOSE) -f $(DIR)/docker-compose.yml logs --tail 50 -f netdata
 
 logs-dozzle:
 	$(COMPOSE) -f $(DIR)/docker-compose.yml logs --tail 50 -f dozzle
@@ -63,6 +71,18 @@ logs-uptime-kuma:
 
 logs-watchtower:
 	$(COMPOSE) -f $(DIR)/docker-compose.yml logs --tail 50 -f watchtower
+
+logs-traefik:
+	$(COMPOSE) -f $(DIR)/docker-compose.yml logs --tail 50 -f traefik
+
+logs-minio:
+	$(COMPOSE) -f $(DIR)/docker-compose.yml logs --tail 50 -f minio
+
+logs-mailpit:
+	$(COMPOSE) -f $(DIR)/docker-compose.yml logs --tail 50 -f mailpit
+
+logs-adminer:
+	$(COMPOSE) -f $(DIR)/docker-compose.yml logs --tail 50 -f adminer
 
 # ---------- Health check ----------
 
