@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install.sh — One-command installer for the woozy dev environment
+# install.sh — One-command installer for the dev-infra environment
 set -euo pipefail
 
 RED='\033[0;31m'
@@ -7,9 +7,9 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-log()  { echo -e "${GREEN}[woozy]${NC} $*"; }
-warn() { echo -e "${YELLOW}[woozy]${NC} $*"; }
-err()  { echo -e "${RED}[woozy]${NC} $*" >&2; exit 1; }
+log()  { echo -e "${GREEN}[dev-infra]${NC} $*"; }
+warn() { echo -e "${YELLOW}[dev-infra]${NC} $*"; }
+err()  { echo -e "${RED}[dev-infra]${NC} $*" >&2; exit 1; }
 
 # --- Require root ---
 [ "$(id -u)" -eq 0 ] || err "Please run as root: sudo ./install.sh"
@@ -46,7 +46,7 @@ log "Docker Compose: $(docker compose version --short)"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECTS_DIR="${PROJECTS_DIR:-/home/docker/projects}"
 BACKUP_DIR="${BACKUP_DIR:-/home/docker/backups}"
-INSTALL_DIR="$PROJECTS_DIR/.woozy-dev-infra"
+INSTALL_DIR="$PROJECTS_DIR/.dev-infra"
 
 mkdir -p "$PROJECTS_DIR" "$BACKUP_DIR"
 log "Projects dir: $PROJECTS_DIR"
@@ -100,8 +100,8 @@ chmod +x "$INSTALL_DIR/init_devbox.sh"
 chmod +x "$INSTALL_DIR/scripts/"*.sh
 
 # --- Install backup cron ---
-CRON_CMD="0 3 * * * cd $INSTALL_DIR && /usr/bin/bash scripts/backup-db.sh >> /var/log/woozy-backup.log 2>&1"
-if ! crontab -l 2>/dev/null | grep -qF "woozy-backup"; then
+CRON_CMD="0 3 * * * cd $INSTALL_DIR && /usr/bin/bash scripts/backup-db.sh >> /var/log/dev-infra-backup.log 2>&1"
+if ! crontab -l 2>/dev/null | grep -qF "dev-infra-backup"; then
     (crontab -l 2>/dev/null; echo "$CRON_CMD") | crontab -
     log "Installed backup cron (3 AM daily)"
 else
@@ -134,7 +134,7 @@ fi
 # --- Print summary ---
 echo ""
 echo "========================================"
-echo "  woozy dev environment is ready!"
+echo "  dev-infra environment is ready!"
 echo "========================================"
 echo ""
 echo "  SSH into dev-box:    ssh -p 2222 root@localhost"

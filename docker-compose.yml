@@ -14,7 +14,7 @@ services:
       - vscode-cli:/root/.vscode-cli
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
-    command: ["/bin/bash", "/workspace/.woozy-dev-infra/init_devbox.sh"]
+    command: ["/bin/bash", "/workspace/.dev-infra/init_devbox.sh"]
 
   timescaledb:
     image: timescale/timescaledb:latest-pg15

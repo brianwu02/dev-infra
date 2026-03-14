@@ -7,7 +7,7 @@ A template full-stack project demonstrating two things:
 ## Setup
 
 ```bash
-cd /workspace/.woozy-dev-infra/sample-project
+cd /workspace/.dev-infra/sample-project
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt

@@ -27,7 +27,7 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
 fi
 
 echo "--- 5. Copying Shell Configs ---"
-INFRA_DIR="/workspace/.woozy-dev-infra"
+INFRA_DIR="/workspace/.dev-infra"
 cp "$INFRA_DIR/configs/zshrc" /root/.zshrc
 cp "$INFRA_DIR/configs/tmux.conf" /root/.tmux.conf
 
