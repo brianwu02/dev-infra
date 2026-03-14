@@ -5,14 +5,20 @@ Reproducible dev environment: a Docker-outside-of-Docker (DooD) dev container wi
 ## Quick Start
 
 ```bash
-# On the host
+# 1. Copy your SSH key to the host (if you haven't already)
+ssh-copy-id root@<host-ip>
+
+# 2. Install on the host
+ssh root@<host-ip>
 git clone https://github.com/brianwu02/dev-infra.git
 cd dev-infra
 sudo ./install.sh
 
-# From your Mac
+# 3. SSH into the dev-box
 ssh -p 2222 root@<host-ip>
 ```
+
+> **Note:** The dev-box only accepts SSH key auth (no passwords). The installer copies keys from the host's `~/.ssh/authorized_keys` into the dev-box automatically. If you can SSH into the host, you can SSH into the dev-box.
 
 ## Try It
 
