@@ -1,0 +1,12 @@
+{
+  "tools": {
+    "allowed": [
+      "run_shell_command(cat)",
+      "run_shell_command(ls)",
+      "run_shell_command(pwd)",
+      "run_shell_command(grep)",
+      "run_shell_command(docker)",
+      "run_shell_command(psql)"
+    ]
+  }
+}

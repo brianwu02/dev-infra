@@ -229,6 +229,28 @@ claude "explain this" < file.py
 gemini                    # Gemini CLI interactive mode
 ```
 
+### AI Skills
+
+The example app includes `.claude/` and `.gemini/` skill directories — pre-configured instructions that teach AI agents how to work with your codebase. Skills are inspired by [everything-claude-code](https://github.com/affaan-m/everything-claude-code).
+
+```
+obviously-the-best-hello-world-app/
+├── CLAUDE.md                          # Project context for Claude Code
+├── GEMINI.md                          # Project context for Gemini CLI
+├── .claude/skills/
+│   ├── coding-standards/SKILL.md      # Naming, imports, type safety
+│   ├── verification-loop/SKILL.md     # Post-change quality gate (/verification-loop)
+│   ├── tdd-workflow/SKILL.md          # Test-driven development process
+│   ├── add-endpoint/SKILL.md          # New API endpoint checklist (/add-endpoint)
+│   ├── add-migration/SKILL.md         # DB migration creation (/add-migration)
+│   ├── db-schema/SKILL.md             # Database schema reference
+│   ├── project-structure/SKILL.md     # File tree and conventions
+│   └── docker-patterns/SKILL.md       # DooD, compose, container patterns
+└── .gemini/skills/                    # Same skills, mirrored for Gemini
+```
+
+Skills marked with `/command` are user-invokable — type the command in Claude Code to trigger them. Copy this structure into your own projects and customize.
+
 ---
 
 ## Reference
