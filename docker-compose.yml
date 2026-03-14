@@ -196,6 +196,29 @@ services:
       - traefik.http.services.kuma.loadbalancer.server.port=3001
     mem_limit: 128m
 
+  obviously-the-best-hello-world-app:
+    build: ./obviously-the-best-hello-world-app
+    container_name: obviously-the-best-hello-world-app
+    restart: unless-stopped
+    environment:
+      - DB_USER=${DB_USER:-devuser}
+      - DB_PASSWORD=${DB_PASSWORD:-changeme}
+      - DB_HOST=timescaledb
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-devdb}
+    ports:
+      - "${HELLO_PORT:-8000}:8000"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.hello.rule=Host(`hello.localhost`)
+      - traefik.http.routers.hello.entrypoints=web
+      - traefik.http.services.hello.loadbalancer.server.port=8000
+      - com.centurylinklabs.watchtower.enable=false
+    mem_limit: 128m
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+
 volumes:
   vscode-cli:
   timescaledb-data:

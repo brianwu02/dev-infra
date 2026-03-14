@@ -2,10 +2,10 @@ COMPOSE = docker compose
 DIR     = $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 .PHONY: up down ps logs health backup-db \
-        up-devbox up-monitoring up-database up-services \
+        up-devbox up-monitoring up-database up-services up-example down-example \
         down-devbox down-monitoring down-database down-services \
         logs-devbox logs-timescaledb logs-homepage logs-dozzle logs-uptime-kuma logs-watchtower \
-        logs-traefik logs-redis logs-minio logs-mailpit logs-adminer
+        logs-traefik logs-redis logs-minio logs-mailpit logs-adminer logs-hello
 
 # ---------- All services ----------
 
@@ -40,6 +40,14 @@ down-monitoring:
 
 down-services:
 	$(COMPOSE) -f $(DIR)/docker-compose.yml stop traefik minio mailpit adminer
+
+# ---------- Example app ----------
+
+up-example:
+	$(COMPOSE) -f $(DIR)/docker-compose.yml up -d --build obviously-the-best-hello-world-app
+
+down-example:
+	$(COMPOSE) -f $(DIR)/docker-compose.yml stop obviously-the-best-hello-world-app
 
 # ---------- Status ----------
 
@@ -83,6 +91,9 @@ logs-mailpit:
 
 logs-adminer:
 	$(COMPOSE) -f $(DIR)/docker-compose.yml logs --tail 50 -f adminer
+
+logs-hello:
+	$(COMPOSE) -f $(DIR)/docker-compose.yml logs --tail 50 -f obviously-the-best-hello-world-app
 
 # ---------- Health check ----------
 

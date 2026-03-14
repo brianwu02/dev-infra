@@ -14,6 +14,20 @@ sudo ./install.sh
 ssh -p 2222 root@<host-ip>
 ```
 
+## Try It
+
+The included example app proves the full stack works — a FastAPI server that increments a hit counter in TimescaleDB:
+
+```bash
+make up-example
+curl -X POST http://localhost:8000/hit   # {"message": "Obviously the best hit counter", "hits": 1}
+curl -X POST http://localhost:8000/hit   # {"message": "Obviously the best hit counter", "hits": 2}
+curl http://localhost:8000               # {"message": "Hello from obviously-the-best-hello-world-app", "hits": 2}
+curl -X POST http://localhost:8000/reset # {"message": "Counter reset", "hits": 0}
+```
+
+The counter persists across container restarts (stored in TimescaleDB). When you're done: `make down-example`
+
 ## What You Get
 
 | Service | Port | Purpose |
@@ -36,6 +50,7 @@ Services are also available via `*.localhost`:
 
 | Route | Service |
 |-------|---------|
+| `hello.localhost` | Example app |
 | `home.localhost` | Homepage |
 | `logs.localhost` | Dozzle |
 | `status.localhost` | Uptime Kuma |
@@ -64,6 +79,8 @@ Copy `.env.example` to `.env` and edit (or let `install.sh` generate it):
 | `make up-database` | Start TimescaleDB + Redis |
 | `make up-monitoring` | Start homepage, watchtower, dozzle, uptime-kuma |
 | `make up-services` | Start traefik, minio, mailpit, adminer |
+| `make up-example` | Build & start the example hello world app |
+| `make down-example` | Stop the example app |
 | `make ps` | Show container status |
 | `make logs` | Recent logs from all containers |
 | `make health` | Run full health check |
