@@ -11,7 +11,7 @@ An AI-first development environment for solo developers. Run multiple AI coding 
 
 ```
   Mac (Client)
-  ┌────────────────────────────────────────────────┐
+  ┌───────────────────────────────────────────────┐
   │  iTerm2 panes: t1, t2, t3, t4, t5             │
   └──────┬─────┬─────┬─────┬─────┬────────────────┘
          │ SSH │     │     │     │
