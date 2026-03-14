@@ -147,8 +147,13 @@ The multi-terminal workflow is inspired by [Boris Cherny's AI terminal setup](ht
 Add to `~/.zshrc` on your Mac:
 
 ```bash
-HOST_IP="192.168.1.200"  # Change to your host IP
+HOST_IP="192.168.1.200"  # Change to your host IP (or Tailscale IP)
 
+# Each alias SSHs into the dev-box and attaches to a named tmux session.
+# If the session doesn't exist, it creates one. If it does, it reattaches.
+# This means you can disconnect (close the terminal, lose wifi, etc.)
+# and pick up exactly where you left off by running the same alias.
+# Run t1-t5 in separate iTerm2 panes for parallel AI agent sessions.
 alias t1="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s1'"
 alias t2="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s2'"
 alias t3="ssh -t -p 2222 root@$HOST_IP 'tmux new-session -As s3'"
