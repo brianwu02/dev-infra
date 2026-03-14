@@ -4,6 +4,8 @@ Reproducible dev environment: a Docker-outside-of-Docker (DooD) dev container wi
 
 ## Quick Start
 
+**Prerequisites:** A running Ubuntu/Debian machine with root access. This guide does not cover provisioning or setting up the host itself — just what runs on top of it.
+
 ```bash
 # 1. Generate an SSH key if you don't have one
 [ -f ~/.ssh/id_ed25519 ] || ssh-keygen -t ed25519
